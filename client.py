@@ -16,13 +16,16 @@ def play_game():
             if not user_input:
                 print("Please enter a valid input.")
                 continue
-            client_socket.sendall(user_input.encode())
-            reply = client_socket.recv(1024).decode().strip()
-            if "Correct" in reply:
+            try:
+                client_socket.sendall(user_input.encode())
+                reply = client_socket.recv(1024).decode().strip()
+                if "Correct" in reply:
+                    print(reply)
+                    break
                 print(reply)
+            except ConnectionError:
+                print("Connection to the server failed.")
                 break
-            print(reply)
-            continue
 
         client_socket.close()
     except KeyboardInterrupt:

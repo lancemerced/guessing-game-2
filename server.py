@@ -74,8 +74,11 @@ while True:
 
         leaderboard[username] = tries
 
-        with open(leaderboard_filename, "a") as leaderboard_file:
-            leaderboard_file.write(f"{username}: {tries} tries\n")
+        try:
+            with open(leaderboard_filename, "a") as leaderboard_file:
+                leaderboard_file.write(f"{username}: {tries} tries\n")
+        except PermissionError:
+            print(f"Permission denied to write to {leaderboard_filename}")
 
         conn.close()
 
