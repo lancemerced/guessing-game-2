@@ -13,6 +13,9 @@ def play_game():
 
         while True:
             user_input = input("").strip()
+            if not user_input:
+                print("Please enter a valid input.")
+                continue
             client_socket.sendall(user_input.encode())
             reply = client_socket.recv(1024).decode().strip()
             if "Correct" in reply:
