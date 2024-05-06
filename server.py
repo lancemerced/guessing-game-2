@@ -25,66 +25,58 @@ if not os.path.exists(LEADERBOARD_DIR):
 leaderboard = {}
 
 while True:
-    try:
-        conn, addr = server_socket.accept()
-        print(f"New client connected: {addr[0]}")
-        conn.sendall(WELCOME_MSG.encode())
+    conn, addr = server_socket.accept()
+    print(f"New client connected: {addr[0]}")
+    conn.sendall(WELCOME_MSG.encode())
 
-        client_input = conn.recv(1024)
-        username = client_input.decode().strip()
+    client_input = conn.recv(1024)
+    username = client_input.decode().strip()
 
-        conn.sendall(b"""
-    Choose difficulty level:
-    1. Easy (1-50)
-    2. Medium (1-100)
-    3. Hard (1-500)
-    Enter the corresponding number:""")
+    conn.sendall(b"""
+Choose difficulty level:
+1. Easy (1-50)
+2. Medium (1-100)
+3. Hard (1-500)
+Enter the corresponding number:""")
 
-        client_input = conn.recv(1024)
-        difficulty_level = int(client_input.decode().strip())
-        if difficulty_level == 1:
-            secret_number = generate_random_number(1, 50)
-            leaderboard_filename = os.path.join(LEADERBOARD_DIR, "easy.txt")
-        elif difficulty_level == 2:
-            secret_number = generate_random_number(1, 100)
-            leaderboard_filename = os.path.join(LEADERBOARD_DIR, "medium.txt")
-        elif difficulty_level == 3:
-            secret_number = generate_random_number(1, 500)
-            leaderboard_filename = os.path.join(LEADERBOARD_DIR, "hard.txt")
-        else:
-            conn.sendall(b"Invalid choice. Please enter a number (1-3): ")
-            conn.close()
-            continue
-
-        conn.sendall(b"Let's start the game!\nEnter your guess:")
-
-        tries = 0
-        while True:
-            client_input = conn.recv(1024)
-            guess = int(client_input.decode().strip())
-            tries += 1
-            print(f"User guess: {guess}")
-            if guess == secret_number:
-                conn.sendall(b"Correct Answer!")
-                break
-            elif guess > secret_number:
-                conn.sendall(b"Guess Lower!\nEnter guess: ")
-            elif guess < secret_number:
-                conn.sendall(b"Guess Higher!\nEnter guess:")
-
-        leaderboard[username] = tries
-
-        try:
-            with open(leaderboard_filename, "a") as leaderboard_file:
-                leaderboard_file.write(f"{username}: {tries} tries\n")
-        except PermissionError:
-            print(f"Permission denied to write to {leaderboard_filename}")
-
+    client_input = conn.recv(1024)
+    difficulty_level = int(client_input.decode().strip())
+    if difficulty_level == 1:
+        secret_number = generate_random_number(1, 50)
+        leaderboard_filename = os.path.join(LEADERBOARD_DIR, "easy.txt")
+    elif difficulty_level == 2:
+        secret_number = generate_random_number(1, 100)
+        leaderboard_filename = os.path.join(LEADERBOARD_DIR, "medium.txt")
+    elif difficulty_level == 3:
+        secret_number = generate_random_number(1, 500)
+        leaderboard_filename = os.path.join(LEADERBOARD_DIR, "hard.txt")
+    else:
+        conn.sendall(b"Invalid choice. Please enter a number (1-3): ")
         conn.close()
+        continue
 
-    except KeyboardInterrupt:
-        print("\nServer shutting down...")
-        break
+    conn.sendall(b"Let's start the game!\nEnter your guess:")
+
+    tries = 0
+    while True:
+        client_input = conn.recv(1024)
+        guess = int(client_input.decode().strip())
+        tries += 1
+        print(f"User guess: {guess}")
+        if guess == secret_number:
+            conn.sendall(b"Correct Answer!")
+            break
+        elif guess > secret_number:
+            conn.sendall(b"Guess Lower!\nEnter guess: ")
+        elif guess < secret_number:
+            conn.sendall(b"Guess Higher!\nEnter guess:")
+
+    leaderboard[username] = tries
+
+    with open(leaderboard_filename, "a") as leaderboard_file:
+        leaderboard_file.write(f"{username}: {tries} tries\n")
+
+    conn.close()
 
 print("\n=== Leaderboard ===")
 for filename in os.listdir(LEADERBOARD_DIR):

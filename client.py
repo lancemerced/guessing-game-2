@@ -1,43 +1,27 @@
 import socket
-import sys
 
-SERVER_HOST = "localhost"
-SERVER_PORT = 7777
+host = "localhost"
+port = 7777
 
 def play_game():
-    try:
-        client_socket = socket.socket()
-        client_socket.connect((SERVER_HOST, SERVER_PORT))
+    s = socket.socket()
+    s.connect((host, port))
 
-        print(client_socket.recv(1024).decode().strip())
+    print(s.recv(1024).decode().strip())
 
-        while True:
-            user_input = input("").strip()
-            if not user_input:
-                print("Please enter a valid input.")
-                continue
-            try:
-                client_socket.sendall(user_input.encode())
-                reply = client_socket.recv(1024).decode().strip()
-                if "Correct" in reply:
-                    print(reply)
-                    break
-                print(reply)
-            except ConnectionError:
-                print("Connection to the server failed.")
-                break
+    while True:
+        user_input = input("").strip()
+        s.sendall(user_input.encode())
+        reply = s.recv(1024).decode().strip()
+        print(reply)
+        if "Correct" in reply:
+            break
 
-        client_socket.close()
-    except KeyboardInterrupt:
-        print("\nConnection interrupted. Exiting...")
-        sys.exit()
+    s.close()
 
 while True:
     play_game()
-    print("\nDo you want to:")
-    print("(A) Play Again")
-    print("(B) Quit")
-    choice = input("Enter key: ")
-    if choice.upper() != "A":
+    choice = input("\nDo you want to play again? (y/n): ").strip().lower()
+    if choice != "y":
         print("Thank you for playing!")
         break
